@@ -151,7 +151,8 @@ export function kidMenu() {
     ${R.s.kids.map((k, i) => `<button class="km-kid${i === R.s.active ? ' on' : ''}" role="menuitemradio" aria-checked="${i === R.s.active}" data-act="switchKid" data-arg="${i}">
       ${kidBadge(k, 44)}<b class="grow">${esc(k.name)}</b>${i === R.s.active ? tick : ''}</button>`).join('')}
     <hr>
-    <button class="km-row" role="menuitem" data-act="nav" data-arg="me">My page — avatar, badges, collection</button>
+    <button class="km-row" role="menuitem" data-act="colTab" data-arg="medals">Collections — medals, avatars, worlds</button>
+    <button class="km-row" role="menuitem" data-act="nav" data-arg="me">My progress — your level, rings and report</button>
     <button class="km-row" role="menuitem" data-act="settings">Settings</button>
     <button class="km-row" role="menuitem" data-act="addKidGate"><span class="grow">+ Add a child</span><span class="km-tag">grown-ups</span></button>
   </div></div>`;

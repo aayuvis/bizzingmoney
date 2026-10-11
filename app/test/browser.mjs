@@ -356,8 +356,16 @@ async function familyChecks(page, label, vp, isMobile, scheme, errors, shot) {
   const kids = await page.evaluate(() => ({ n: document.querySelectorAll('.kidmenu .km-kid').length, on: document.querySelectorAll('.kidmenu .km-kid[aria-checked="true"]').length,
     rows: [...document.querySelectorAll('.kidmenu .km-row')].map((r) => r.getAttribute('data-act') + (r.getAttribute('data-arg') ? ':' + r.getAttribute('data-arg') : '')),
     add: /grown-ups/i.test((document.querySelector('.kidmenu [data-act="addKidGate"]') || {}).textContent || '') }));
-  ok(`${label}: the avatar menu lists every child (ticked), My page, Settings and a PIN-guarded “Add a child”`, kids.n === 1 && kids.on === 1 && kids.rows.join() === 'nav:me,settings,addKidGate' && kids.add, JSON.stringify(kids));
-  await page.evaluate(() => window.BZF.fire('closeOv'));
+  ok(`${label}: the avatar menu lists every child (ticked), Collections, My progress, Settings and a PIN-guarded “Add a child”`, kids.n === 1 && kids.on === 1 && kids.rows.join() === 'colTab:medals,nav:me,settings,addKidGate' && kids.add, JSON.stringify(kids));
+  /* Collections goes straight to the Collection on its Medals tab, Bee's layout: a card per group, "n/m won" */
+  await page.click('.kidmenu [data-act="colTab"]'); await page.waitForSelector('.mgroup');
+  const col = await page.evaluate(() => ({ hash: location.hash, menu: !!document.querySelector('.kidmenu'), groups: document.querySelectorAll('.mgroup').length,
+    won: /\d+\/\d+ won/.test((document.querySelector('.mgroup-n') || {}).textContent || ''), tiles: document.querySelectorAll('.mtile').length, top: Math.round(scrollY) }));
+  ok(`${label}: “Collections” opens the Collection on its Medals tab — eight groups, “n/m won”, every medal a tile`, col.hash === '#/collection/medals' && !col.menu && col.groups === 8 && col.won && col.tiles === 50 && col.top === 0, JSON.stringify(col));
+  await page.evaluate(() => window.BZF.fire('kids')); await page.waitForTimeout(150);
+  await page.click('.kidmenu [data-act="nav"][data-arg="me"]'); await page.waitForTimeout(250);
+  ok(`${label}: “My progress” opens My page`, await page.evaluate(() => location.hash === '#/me' && !document.querySelector('.kidmenu')));
+  await go('#/home');
 
   /* §3 §4 §6 · Bee's chrome and home, measured (integration/shell-check.mjs): the top bar,
      the tab row or bottom bar, the three home rows, and the ☰ by keyboard (Esc, focus).

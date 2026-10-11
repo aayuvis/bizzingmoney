@@ -454,3 +454,21 @@ html[data-bz-dark] .so-msg{background:rgb(20 24 36 / .9)}
 .so-restock{min-height:48px;gap:8px}
 .so-restock .bar{flex:1;height:6px;max-width:120px}
 .so-restock.busy{background-image:repeating-linear-gradient(-45deg,rgb(240 180 41 / .28) 0 10px,transparent 10px 20px) !important}
+
+/* ── the Medals tab, as Bizzing Bee's: a card per group, a tile per medal ── */
+.mgroup{padding:16px 18px}
+.mgroup-h{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.mgroup-h h2{margin:0;font:800 20px var(--display,serif)}
+.mgroup-n{font-weight:700;color:var(--muted)}
+.mtiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.mtile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px 14px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);text-align:center}
+.mtile-art{position:relative;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--tint);filter:grayscale(1);opacity:.6}
+.mtile.won{border-color:var(--treasure,#F5B31F);background:color-mix(in srgb,var(--treasure,#F5B31F) 8%,var(--surface))}
+.mtile.won .mtile-art{filter:none;opacity:1;background:color-mix(in srgb,var(--treasure,#F5B31F) 28%,var(--surface))}
+.mtile-lock{position:absolute;right:-2px;bottom:-2px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line)}
+.mtile b{font-size:14.5px;line-height:1.2}
+.mtile:not(.won) b{color:var(--muted)}
+.mtile-d{font-size:12.5px;line-height:1.35;color:var(--muted)}
+.mtile-s{margin-top:auto;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.mtile-s.won{color:var(--grow);display:inline-flex;align-items:center;gap:3px}
+@media (max-width:640px){.mtiles{grid-template-columns:repeat(2,1fr)}}

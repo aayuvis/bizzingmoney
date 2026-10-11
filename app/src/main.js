@@ -850,7 +850,7 @@ on('buyAv', (id) => {
   sfx.unlock(); confetti(40); toast(`${a.name} is yours — and you are wearing it`); render();
 });
 on('shopTab', (t) => { R.shopTab = t; render(); });
-on('colTab', (t) => { R.colTab = t; R.s.ui.nav = 'collection'; sfx.click(); render(); const b = document.querySelector(`.col-tabs [data-arg="${t}"]`); if (b) b.focus(); });
+on('colTab', (t) => { const fromMenu = !!R.overlay; R.overlay = null; R.colTab = t; R.s.ui.nav = 'collection'; sfx.click(); render(); if (fromMenu) window.scrollTo(0, 0); const b = document.querySelector(`.col-tabs [data-arg="${t}"]`); if (b) b.focus(); });
 /* a face in the Collection opens its trading card */
 on('avCard', (id) => { if (BY_ID[id]) { R.overlay = { kind: 'avInfo', id }; sfx.click(); render(); } });
 /* Print my cards: every card the child holds, laid out to cut out (print.css rules in tasks.css) */

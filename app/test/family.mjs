@@ -128,5 +128,13 @@ console.log('\nFamily · one next step, no streaks\n' + '─'.repeat(56));
   const view = strip(src('views.js'));
   ok(/function wordCard\([\s\S]*?WORD_ICON\[term\][\s\S]*?ico\(k/.test(view), 'the Money Words page draws each word from WORD_ICON');
 }
+/* the Medals tab: every medal in exactly one group, and no group names a medal that does not exist */
+{
+  const { BADGES } = await import('../src/content.js');
+  const { MEDAL_GROUPS } = await import('../src/views.js');
+  const all = MEDAL_GROUPS.flatMap(([, ks]) => ks);
+  const missing = Object.keys(BADGES).filter((k) => all.filter((x) => x === k).length !== 1), ghost = all.filter((k) => !BADGES[k]);
+  ok(!missing.length && !ghost.length, 'every medal sits in exactly one group on the Medals tab', missing.concat(ghost).join(' '));
+}
 console.log(`\n${pass}/${pass + fail} passed`);
 if (fail) process.exit(1);
