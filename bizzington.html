@@ -18512,7 +18512,8 @@ html[data-bz-dark] .sbendsub{background:rgb(20 24 36 / .9);color:#F4EEE4}
     ${R.s.kids.map((k, i) => `<button class="km-kid${i === R.s.active ? " on" : ""}" role="menuitemradio" aria-checked="${i === R.s.active}" data-act="switchKid" data-arg="${i}">
       ${kidBadge(k, 44)}<b class="grow">${esc(k.name)}</b>${i === R.s.active ? tick5 : ""}</button>`).join("")}
     <hr>
-    <button class="km-row" role="menuitem" data-act="nav" data-arg="me">My page \u2014 avatar, badges, collection</button>
+    <button class="km-row" role="menuitem" data-act="colTab" data-arg="medals">Collections \u2014 medals, avatars, worlds</button>
+    <button class="km-row" role="menuitem" data-act="nav" data-arg="me">My progress \u2014 your level, rings and report</button>
     <button class="km-row" role="menuitem" data-act="settings">Settings</button>
     <button class="km-row" role="menuitem" data-act="addKidGate"><span class="grow">+ Add a child</span><span class="km-tag">grown-ups</span></button>
   </div></div>`;
@@ -35650,28 +35651,32 @@ ${drawerHTML(o)}`;
     prompts.push("Ask what the first thing you ever saved up for was. It is one of the app's own questions.");
     return { learned, decisions, prompts };
   }
-  function viewCollection({ bare: bare2 = false } = {}) {
-    const c = K2();
-    const have = Object.keys(BADGES).filter((k) => c.badges.includes(k)).length;
-    return `<div class="stack">
-    ${bare2 ? '<p class="small muted" style="margin:0">Medals are for good decisions. Keepsakes are for things you did. Nothing here is for just showing up.</p>' : hero({
-      eyebrow: "Kept, never given",
-      title: "Medals",
-      figure: has2(c) ? companionFigure(c, 110) : pipPose("cheer", 110),
-      line: "Medals are for good decisions. Keepsakes are for things you did. Nothing here is for just showing up."
-    })}
-    <div class="card">
-      <div class="eyebrow">Things you did</div>
-      ${(c.deeds || []).length ? `
-        <div class="beads" aria-hidden="true">${(c.deeds || []).slice(-30).map(() => "<i></i>").join("")}</div>
-        <p class="small muted" style="margin-top:6px">${deedCount(c)} ${deedCount(c) === 1 ? "thing" : "things"} done out in the real world. Never full, never checked, never goes down.</p>
-        <div class="rows" style="margin-top:6px">${(c.deeds || []).slice(-5).reverse().map((d2) => `<div class="qrow"><span class="iw">${ico("check", "\u2705", 18)}</span><span class="grow small">${esc(d2.text)}</span><span class="small muted">${shortDate(d2.t)}</span></div>`).join("")}</div>` : `<p class="small muted" style="margin-top:4px">Every "Do one" from Home that you do in real life adds a bead here.</p>`}
-    </div>
-    <div class="card">
-      <div class="eyebrow">Keepsakes</div>
-      ${(c.keepsakes || []).length ? `<div class="stack" style="gap:10px;margin-top:10px">${c.keepsakes.map((k) => keepsakeSlip(k)).join("")}</div>` : `<p class="small muted" style="margin-top:4px">Your first purchase goes here, with the shifts that paid for it. Nothing here is given \u2014 it's earned.</p>`}
-    </div>
-    <div class="card">
+  var MEDAL_GROUPS = [
+    ["Atlas", ["chapter-c1", "chapter-c2", "chapter-c3", "chapter-c4", "chapter-c5", "chapter-c6", "chapter-c7", "chapter-c8", "tested-out", "checkpoint", "placed"]],
+    ["Earning", ["first-coin", "asked-back", "till-solved", "first-look", "exact-change", "three-of-three"]],
+    ["Saving and planning", ["jars-set", "goal-built", "rainy-day", "times-twelve", "noticed-inflation", "gave"]],
+    ["Spending wisely", ["first-receipt", "dressed-up", "cool-head", "scam-spotter"]],
+    ["Borrowing and home", ["borrowed-well", "moved-in", "homeowner", "put-right", "rebuilder", "traveller"]],
+    ["Growing and markets", ["steady-hand", "held-the-storm", "diversified", "climbed", "indep-10", "indep-25", "indep-50", "indep-100"]],
+    ["Running something", ["shopkeeper", "profit-day", "main-street"]],
+    ["Life in the town", ["adopted", "well-fed", "all-grown", "asked-home", "did-one", "ten-deeds"]]
+  ];
+  function medalGroups(c) {
+    return MEDAL_GROUPS.map(([g, keys]) => {
+      const ks = keys.filter((k) => BADGES[k]), won = ks.filter((k) => c.badges.includes(k)).length;
+      return `<section class="card mgroup"><div class="mgroup-h"><h2>${esc(g)}</h2><span class="mgroup-n">${won}/${ks.length} won</span></div>
+      <div class="mtiles">${ks.map((k) => {
+        const b = BADGES[k], has4 = c.badges.includes(k);
+        return `<div class="mtile${has4 ? " won" : ""}" data-focus="badge:${k}">
+          <span class="mtile-art">${ico(b.em, b.em, 34)}${has4 ? "" : `<span class="mtile-lock">${ico("lock", "", 13)}</span>`}</span>
+          <b>${esc(b.name)}</b><span class="mtile-d">${esc(b.desc)}</span>
+          ${has4 ? `<span class="mtile-s won">Won ${ico("check", "", 13)}</span><button class="btn ghost sm showgu" data-act="showMedal" data-arg="${k}">Show a grown-up</button>` : '<span class="mtile-s">Locked</span>'}
+        </div>`;
+      }).join("")}</div></section>`;
+    }).join("");
+  }
+  function listMedals(c, have) {
+    return `    <div class="card">
       <div class="row"><div class="grow"><div class="eyebrow">Medals</div>
         <h2 style="margin:2px 0 0">${have} of ${Object.keys(BADGES).length}</h2></div></div>
       ${(() => {
@@ -35697,6 +35702,30 @@ ${drawerHTML(o)}`;
       )}</div>` : ""}`;
     })()}
     </div>
+`;
+  }
+  function viewCollection({ bare: bare2 = false } = {}) {
+    const c = K2();
+    const have = Object.keys(BADGES).filter((k) => c.badges.includes(k)).length;
+    return `<div class="stack">
+    ${bare2 ? '<p class="small muted" style="margin:0">Medals are for good decisions. Keepsakes are for things you did. Nothing here is for just showing up.</p>' + medalGroups(c) : hero({
+      eyebrow: "Kept, never given",
+      title: "Medals",
+      figure: has2(c) ? companionFigure(c, 110) : pipPose("cheer", 110),
+      line: "Medals are for good decisions. Keepsakes are for things you did. Nothing here is for just showing up."
+    })}
+    <div class="card">
+      <div class="eyebrow">Things you did</div>
+      ${(c.deeds || []).length ? `
+        <div class="beads" aria-hidden="true">${(c.deeds || []).slice(-30).map(() => "<i></i>").join("")}</div>
+        <p class="small muted" style="margin-top:6px">${deedCount(c)} ${deedCount(c) === 1 ? "thing" : "things"} done out in the real world. Never full, never checked, never goes down.</p>
+        <div class="rows" style="margin-top:6px">${(c.deeds || []).slice(-5).reverse().map((d2) => `<div class="qrow"><span class="iw">${ico("check", "\u2705", 18)}</span><span class="grow small">${esc(d2.text)}</span><span class="small muted">${shortDate(d2.t)}</span></div>`).join("")}</div>` : `<p class="small muted" style="margin-top:4px">Every "Do one" from Home that you do in real life adds a bead here.</p>`}
+    </div>
+    <div class="card">
+      <div class="eyebrow">Keepsakes</div>
+      ${(c.keepsakes || []).length ? `<div class="stack" style="gap:10px;margin-top:10px">${c.keepsakes.map((k) => keepsakeSlip(k)).join("")}</div>` : `<p class="small muted" style="margin-top:4px">Your first purchase goes here, with the shifts that paid for it. Nothing here is given \u2014 it's earned.</p>`}
+    </div>
+    ${bare2 ? "" : listMedals(c, have)}
     <div class="card">
       <div class="eyebrow">People you've met</div>
       <div class="grid3" style="margin-top:10px">
@@ -37824,10 +37853,13 @@ ${drawerHTML(o)}`;
     render();
   });
   on("colTab", (t) => {
+    const fromMenu = !!R.overlay;
+    R.overlay = null;
     R.colTab = t;
     R.s.ui.nav = "collection";
     sfx.click();
     render();
+    if (fromMenu) window.scrollTo(0, 0);
     const b = document.querySelector(`.col-tabs [data-arg="${t}"]`);
     if (b) b.focus();
   });
